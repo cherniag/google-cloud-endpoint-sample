@@ -17,7 +17,7 @@ public class BatchService {
     private static final String KIND = "Batch";
     private EntityService entityService = new EntityService();
 
-    public void createBatch(String name, int generateCodesCount, Date startDate, Date endDate, String owner) {
+    /*public void createBatch(String name, int generateCodesCount, Date startDate, Date endDate, String owner) {
         Entity batch = new Entity(KIND);
         batch.setProperty("name", name);
         batch.setProperty("generateCodesCount", generateCodesCount);
@@ -26,6 +26,17 @@ public class BatchService {
         batch.setProperty("endDate", endDate);
         batch.setProperty("owner", owner);
         entityService.create(batch);
+    }*/
+
+    public void createBatch(Batch batch) {
+        Entity entity = new Entity(KIND);
+        entity.setProperty("name", batch.name);
+        entity.setProperty("generateCodesCount", batch.generateCodesCount);
+        entity.setProperty("createDate", new Date());
+        entity.setProperty("startDate", batch.startDate);
+        entity.setProperty("endDate", batch.endDate);
+        entity.setProperty("owner", batch.owner);
+        entityService.create(entity);
     }
 
 
