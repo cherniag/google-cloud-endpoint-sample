@@ -26,9 +26,10 @@
 </style>
 
 <script>
-    $(document).ready(function () {
-        refreshBatches();
-    });
+    //$(document).ready(function () {
+    //    // refreshBatches();
+    //    refreshBatchesUsingGapi();
+    //});
 
     function initGapi(){
         var ROOT = 'https://voucher-admin.appspot.com/_ah/api';
@@ -38,64 +39,41 @@
     }
 
     function afterLoadingGapi(){
-       /* // Insert a score
-        gapi.client.tictactoe.scores.insert({'outcome':
-            'WON'}).execute(function(resp) {
-          console.log(resp);
-        });*/
-
-        // Get the list of previous scores
+        // Get the list of batches
+        // gapi.client.<@Api(name)>.<@ApiMethod(name)>(<params>).execute(<callback>)
         gapi.client.batches.getBatches().execute(function(resp) {
-          console.log(resp);
+           refreshBatchesUsingGapi();
         });
     }
 
     function refreshBatches() {
-        $.getJSON('https://voucher-admin.appspot.com/_ah/api/batches/v1/batches', function (data) {
-            $('#allBatches').html('<div class="row" style="font-weight: bold">' +
-            '<div>Id</div><div style="width:120px">Name</div><div style="width:120px">Code count</div>' +
-            '<div>Create date</div><div>Start date</div><div>End date</div><div style="width:120px">Owner</div>' +
-            '</div>');
-
-            var items = data['items'];
-            for (var i = 0; i < items.length; i++) {
-                $('#allBatches').append(
-                        '<div class="row">' +
-                            '<a data="' + items[i].id + '" href="#">' + items[i].id + '</a>' +
-                            '<div style="width:120px">' + items[i].name + '</div>' +
-                            '<div style="width:120px">' + items[i].generateCodesCount + '</div>' +
-                            '<div>' + items[i].createDate + '</div>' +
-                            '<div>' + items[i].startDate + '</div>' +
-                            '<div>' + items[i].endDate + '</div>' +
-                            '<div style="width:120px">' + items[i].owner + '</div>' +
-                        '</div>'
-                );
-            }
-
-            $('.row a').each(function () {
-                $(this).click(function () {
-                    getById($(this).attr('data'));
-                });
-            });
+        $.getJSON('https://voucher-admin.appspot.com/_ah/api/batches/v1/batches', function(data){
+            renderBatches(data)
         });
     }
 
+    function refreshBatchesUsingGapi() {
+        gapi.client.batches.getBatches().execute(function(resp) {
+            renderBatches(resp);
+        });
+    }
+
+    // simple ajax call
     function getById(id) {
-        $.getJSON('https://voucher-admin.appspot.com/_ah/api/batches/v1/batches/' + id, function (data) {
-            $('#batchHolder').html(
-                    '<div>' + data.id + '</div>' +
-                    '<div>' + data.name + '</div>' +
-                    '<div>' + data.generateCodesCount + '</div>' +
-                    '<div>' + data.createDate + '</div>' +
-                    '<div>' + data.startDate + '</div>' +
-                    '<div>' + data.endDate + '</div>' +
-                    '<div>' + data.owner + '</div>'
-            );
+        $.getJSON('https://voucher-admin.appspot.com/_ah/api/batches/v1/batches/' + id, function(data){
+            renderBatch(data)
+        });
+    }
+
+    // use gapi
+    function getByIdUsingGapi(id) {
+        gapi.client.batches.getBatch({'id' : id}).execute(function(resp) {
+          renderBatch(resp);
         });
     }
 
     function createBatch() {
-        var _data = toJson('form#createBatchForm');
+        var _data = JSON.stringify(toObject('form#createBatchForm'));
         $.ajax({
             url: 'https://voucher-admin.appspot.com/_ah/api/batches/v1/batches',
             beforeSend: function(xhrObj){
@@ -115,9 +93,70 @@
         });
     }
 
+    function createBatchUsingGapi() {
+        var _data = toObject('form#createBatchForm');
+        gapi.client.batches.create(_data).execute(function(resp) {
+          refreshBatchesUsingGapi();
+        });
+    }
+
+    function auth() {
+        var config = {
+          'client_id': '617753369170-chlc7pjm7alo6pjgsfjv9oa8kskjcr3b.apps.googleusercontent.com', // web client id from console
+          'scope': 'https://www.googleapis.com/auth/userinfo.email'
+        };
+        gapi.auth.authorize(config, function() {
+          console.log('login complete');
+          console.log(gapi.auth.getToken());
+        });
+    }
+
+    //
+    // private API
+    //
+    function renderBatch(data){
+        $('#batchHolder').html(
+            '<div>' + data.id + '</div>' +
+            '<div>' + data.name + '</div>' +
+            '<div>' + data.generateCodesCount + '</div>' +
+            '<div>' + data.createDate + '</div>' +
+            '<div>' + data.startDate + '</div>' +
+            '<div>' + data.endDate + '</div>' +
+            '<div>' + data.owner + '</div>'
+        );
+    }
 
 
-    function toJson($form){
+    function renderBatches(data) {
+        $('#allBatches').html('<div class="row" style="font-weight: bold">' +
+        '<div>Id</div><div style="width:120px">Name</div><div style="width:120px">Code count</div>' +
+        '<div>Create date</div><div>Start date</div><div>End date</div><div style="width:120px">Owner</div>' +
+        '</div>');
+
+        var items = data['items'];
+        for (var i = 0; i < items.length; i++) {
+            $('#allBatches').append(
+                    '<div class="row">' +
+                        '<a data="' + items[i].id + '" href="#">' + items[i].id + '</a>' +
+                        '<div style="width:120px">' + items[i].name + '</div>' +
+                        '<div style="width:120px">' + items[i].generateCodesCount + '</div>' +
+                        '<div>' + items[i].createDate + '</div>' +
+                        '<div>' + items[i].startDate + '</div>' +
+                        '<div>' + items[i].endDate + '</div>' +
+                        '<div style="width:120px">' + items[i].owner + '</div>' +
+                    '</div>'
+            );
+        }
+
+        $('.row a').each(function () {
+            $(this).click(function () {
+                getByIdUsingGapi($(this).attr('data'));
+            });
+        });
+    }
+
+    //convert form data to object
+    function toObject($form){
         var config = {};
         $($form).serializeArray().map(function(item) {
             if ( config[item.name] ) {
@@ -129,7 +168,7 @@
                 config[item.name] = item.value;
             }
         });
-        return JSON.stringify(config);
+        return config;
     }
 
 </script>
@@ -139,8 +178,6 @@
 
 <h4>Create batch</h4>
 
-
-<!--http://reflecting-poet-101515.appspot.com/-->
 <form method="post" action="/batches" id="createBatchForm">
     <span>Name:</span>
     <input name="name" type="text">
@@ -159,7 +196,7 @@
     <br>
     <!--<input type="submit" value="Create">-->
 </form>
-<button onclick="createBatch()">Create</button>
+<button onclick="createBatchUsingGapi()">Create</button>
 
 <br>
 <br>
@@ -177,7 +214,7 @@
 <br>
 <br>
 <br>
-<button onclick="t()">Test</button>
+<button onclick="auth();">Authorize</button>
 
 </body>
 </html>
