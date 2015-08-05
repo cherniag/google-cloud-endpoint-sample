@@ -33,6 +33,17 @@
             <artifactId>appengine-endpoints</artifactId>
             <version>${appengine.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.googlecode.objectify</groupId>
+            <artifactId>objectify</artifactId>
+            <version>4.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
+
 
         <!-- for client request! -->
         <dependency>
@@ -40,6 +51,12 @@
             <artifactId>google-api-client</artifactId>
             <version>1.20.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5</version>
+        </dependency>
+
 
         <dependency>
             <groupId>javax.servlet</groupId>

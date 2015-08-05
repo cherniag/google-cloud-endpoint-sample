@@ -1,34 +1,39 @@
 package com.mq.gae.voucher.admin.api.batches;
 
 import com.google.api.server.spi.config.ApiResourceProperty;
+import com.google.appengine.repackaged.org.codehaus.jackson.annotate.JsonIgnore;
+import com.googlecode.objectify.Ref;
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Load;
+import com.googlecode.objectify.annotation.Parent;
+import com.mq.gae.voucher.admin.api.campaigns.Campaign;
+import com.mq.gae.voucher.admin.api.vouchers.Voucher;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Author: Gennadii Cherniaiev
  * Date: 7/23/2015
  */
-public class Batch implements Serializable{
+@Entity
+public class Batch implements Serializable {
+    @Id
     Long id;
+    @JsonIgnore
+    @Parent
+    Ref<Campaign> campaignRef;
     String name;
     Long generateCodesCount;
     Date createDate;
     Date startDate;
     Date endDate;
     String owner;
+    Boolean isActive;
 
     public Batch() {
-    }
-
-    public Batch(Long id, String name, Long generateCodesCount, Date createDate, Date startDate, Date endDate, String owner) {
-        this.id = id;
-        this.name = name;
-        this.generateCodesCount = generateCodesCount;
-        this.createDate = createDate;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.owner = owner;
     }
 
     public Long getId() {
@@ -87,6 +92,22 @@ public class Batch implements Serializable{
         this.owner = owner;
     }
 
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    public Ref<Campaign> getCampaignRef() {
+        return campaignRef;
+    }
+
+    public void setCampaignRef(Ref<Campaign> campaignRef) {
+        this.campaignRef = campaignRef;
+    }
+
     @Override
     public String toString() {
         return "Batch{" +
@@ -97,6 +118,7 @@ public class Batch implements Serializable{
                 ", startDate=" + startDate +
                 ", endDate=" + endDate +
                 ", owner='" + owner + '\'' +
+                ", isActive='" + isActive + '\'' +
                 '}';
     }
 }

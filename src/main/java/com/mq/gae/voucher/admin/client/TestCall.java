@@ -9,7 +9,9 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Author: Gennadii Cherniaiev
@@ -41,6 +43,7 @@ public class TestCall {
                         .setServiceAccountId(SERVICE_ACCOUNT_EMAIL)
                         .setServiceAccountScopes(Collections.singleton(EMAIL_SCOPE))
                         .setServiceAccountPrivateKeyFromP12File(new File("D:\\key.p12"))
+                                //.setServiceAccountPrivateKeyId("af5da290cf4beb9ea2061931a4daa6bc4429c4e9")
                         .build();
 
                 // Set up and execute a Google Cloud Storage request.

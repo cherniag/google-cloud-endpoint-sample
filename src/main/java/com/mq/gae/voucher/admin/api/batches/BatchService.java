@@ -1,70 +1,66 @@
 package com.mq.gae.voucher.admin.api.batches;
 
-import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.Query;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Ref;
+import com.mq.gae.voucher.admin.api.campaigns.Campaign;
+import com.mq.gae.voucher.admin.api.communities.Community;
+import com.mq.gae.voucher.admin.api.vouchers.VoucherService;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
+
+import static com.googlecode.objectify.ObjectifyService.ofy;
 
 /**
  * Author: Gennadii Cherniaiev
  * Date: 7/23/2015
  */
 public class BatchService {
+    private static final Logger logger = Logger.getLogger(BatchesEndpoint.class.getName());
+    private static final BatchService BATCH_SERVICE = new BatchService();
+    private VoucherService voucherService = VoucherService.getInstance();
 
-    private static final String KIND = "Batch";
-    private EntityService entityService = new EntityService();
+    public static BatchService getInstance() {
+         return BATCH_SERVICE;
+    }
 
-    /*public void createBatch(String name, int generateCodesCount, Date startDate, Date endDate, String owner) {
-        Entity batch = new Entity(KIND);
-        batch.setProperty("name", name);
-        batch.setProperty("generateCodesCount", generateCodesCount);
-        batch.setProperty("createDate", new Date());
-        batch.setProperty("startDate", startDate);
-        batch.setProperty("endDate", endDate);
-        batch.setProperty("owner", owner);
-        entityService.create(batch);
-    }*/
+    private BatchService() {
 
-    public void createBatch(Batch batch) {
-        Entity entity = new Entity(KIND);
-        entity.setProperty("name", batch.name);
-        entity.setProperty("generateCodesCount", batch.generateCodesCount);
-        entity.setProperty("createDate", new Date());
-        entity.setProperty("startDate", batch.startDate);
-        entity.setProperty("endDate", batch.endDate);
-        entity.setProperty("owner", batch.owner);
-        entityService.create(entity);
+    }
+
+    public void createBatch(Batch batch, long communityId, long campaignId) {
+        // make transactional
+        Key<Community> communityKey = Key.create(Community.class, communityId);
+        Key<Campaign> campaignKey = Key.create(communityKey, Campaign.class, campaignId);
+        batch.campaignRef = Ref.create(campaignKey);
+        ofy().save().entity(batch).now();
+        voucherService.generate(batch);
     }
 
 
-    public Batch findOne(Long id) throws EntityNotFoundException {
-        Entity one = entityService.findOne(KIND, id);
-
-        return convert(one);
+    public Batch findOne(long communityId, long campaignId, Long batchId) throws EntityNotFoundException {
+        // not ancestor!
+        Key<Community> communityKey = Key.create(Community.class, communityId);
+        Key<Campaign> campaignKey = Key.create(communityKey, Campaign.class, campaignId);
+        Key<Batch> batchKey = Key.create(campaignKey, Batch.class, batchId);
+        return ofy().load().key(batchKey).now();
     }
 
-    public List<Batch> findAll() throws EntityNotFoundException {
-        List<Entity> all = entityService.findAll(KIND, "createDate", Query.SortDirection.ASCENDING);
-        List<Batch> batches = new ArrayList<Batch>();
-        for (Entity entity : all) {
-            batches.add(convert(entity));
-        }
-        return batches;
+    public List<Batch> findAll(long communityId, long campaignId) throws EntityNotFoundException {
+        Key<Community> communityKey = Key.create(Community.class, communityId);
+        Key<Campaign> campaignKey = Key.create(communityKey, Campaign.class, campaignId);
+        logger.info("campaignKey: " + campaignKey.getString());
+        return ofy().load().type(Batch.class).ancestor(campaignKey).list();
     }
 
-    private Batch convert(Entity one) {
-        return new Batch(
-                one.getKey().getId(),
-                (String)one.getProperty("name"),
-                (Long)one.getProperty("generateCodesCount"),
-                (Date)one.getProperty("createDate"),
-                (Date)one.getProperty("startDate"),
-                (Date)one.getProperty("endDate"),
-                (String)one.getProperty("owner")
-        );
+    public Batch changeStatus(long batchId, long communityId, long campaignId, boolean isActive) {
+        Key<Community> communityKey = Key.create(Community.class, communityId);
+        Key<Campaign> campaignKey = Key.create(communityKey, Campaign.class, campaignId);
+        Key<Batch> batchKey = Key.create(campaignKey, Batch.class, batchId);
+        Batch batch = ofy().load().key(batchKey).now();
+        batch.isActive = isActive;
+        ofy().save().entity(batch).now();
+        return batch;
     }
-
 }
