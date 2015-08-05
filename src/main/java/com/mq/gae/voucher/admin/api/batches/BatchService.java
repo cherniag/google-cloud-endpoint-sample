@@ -40,18 +40,17 @@ public class BatchService {
 
 
     public Batch findOne(long communityId, long campaignId, Long batchId) throws EntityNotFoundException {
-        // not ancestor!
         Key<Community> communityKey = Key.create(Community.class, communityId);
         Key<Campaign> campaignKey = Key.create(communityKey, Campaign.class, campaignId);
         Key<Batch> batchKey = Key.create(campaignKey, Batch.class, batchId);
         return ofy().load().key(batchKey).now();
     }
 
-    public List<Batch> findAll(long communityId, long campaignId) throws EntityNotFoundException {
+    public List<Batch> findAll(long communityId, long campaignId, int page, int size) throws EntityNotFoundException {
         Key<Community> communityKey = Key.create(Community.class, communityId);
         Key<Campaign> campaignKey = Key.create(communityKey, Campaign.class, campaignId);
         logger.info("campaignKey: " + campaignKey.getString());
-        return ofy().load().type(Batch.class).ancestor(campaignKey).list();
+        return ofy().load().type(Batch.class).ancestor(campaignKey).offset(page * size).limit(size).list();
     }
 
     public Batch changeStatus(long batchId, long communityId, long campaignId, boolean isActive) {

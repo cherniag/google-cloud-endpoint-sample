@@ -1,4 +1,4 @@
-package com.mq.gae.voucher.admin.api;
+package com.mq.gae.voucher.admin.api.dtos;
 
 /**
  * Author: Gennadii Cherniaiev

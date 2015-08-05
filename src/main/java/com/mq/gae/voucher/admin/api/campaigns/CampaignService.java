@@ -33,10 +33,10 @@ public class CampaignService {
         return ofy().load().key(campaignKey).now();
     }
 
-    public List<Campaign> findAll(long communityId) {
+    public List<Campaign> findAll(long communityId, int page, int size) {
         Key<Community> communityKey = Key.create(Community.class, communityId);
         logger.info("communityKey: " + communityKey.getString());
-        return ofy().load().type(Campaign.class).ancestor(communityKey).list();
+        return ofy().load().type(Campaign.class).ancestor(communityKey).offset(page * size).limit(size).list();
     }
 
     public void createCampaign(Campaign campaign, long communityId) {

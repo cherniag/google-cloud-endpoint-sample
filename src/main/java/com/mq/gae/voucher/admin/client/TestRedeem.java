@@ -1,14 +1,6 @@
 package com.mq.gae.voucher.admin.client;
 
-import com.google.api.client.http.*;
-import com.google.api.client.http.apache.ApacheHttpTransport;
-import com.google.api.client.http.json.JsonHttpContent;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.mq.gae.voucher.admin.api.UserDto;
-import org.apache.http.*;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -71,7 +63,8 @@ public class TestRedeem {
             String s;
             while((s = queue.poll())!=null) {
                 try {
-                    String url = "https://voucher-admin.appspot.com/_ah/api/voucheradmin/v2/communities/1/vouchers/" + s + "/redeem";
+                    String url = "http://localhost:8080/_ah/api/voucheradmin/v2/communities/1/vouchers/" + s + "/redeem";
+                    //String url = "https://voucher-admin.appspot.com/_ah/api/voucheradmin/v2/communities/1/vouchers/" + s + "/redeem";
 
                     HttpClient client = HttpClientBuilder.create().build();
                     HttpPut put = new HttpPut(url);

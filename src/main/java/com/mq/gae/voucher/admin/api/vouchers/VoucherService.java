@@ -30,11 +30,11 @@ public class VoucherService {
 
     }
 
-    public List<Voucher> findAll(long communityId, long campaignId, long batchId) {
+    public List<Voucher> findAll(long communityId, long campaignId, long batchId, int page, int size) {
         Key<Community> communityKey = Key.create(Community.class, communityId);
         Key<Campaign> campaignKey = Key.create(communityKey, Campaign.class, campaignId);
         Key<Batch> batchKey = Key.create(campaignKey, Batch.class, batchId);
-        return ofy().load().type(Voucher.class).ancestor(batchKey).list();
+        return ofy().load().type(Voucher.class).ancestor(batchKey).offset(page * size).limit(size).list();
     }
 
     public void generate(Batch batch) {

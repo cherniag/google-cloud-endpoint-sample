@@ -3,6 +3,8 @@ package com.mq.gae.voucher.admin.api.batches;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiMethod.HttpMethod;
+import com.google.api.server.spi.config.DefaultValue;
+import com.google.api.server.spi.config.Nullable;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.oauth.OAuthRequestException;
 import com.google.appengine.api.users.User;
@@ -21,7 +23,7 @@ import static com.google.api.server.spi.config.ApiMethod.HttpMethod.POST;
 /**
  * Author: Gennadii Cherniaiev
  * Date: 7/24/2015
- *
+ * <p/>
  * Check oauth2 working: https://developers.google.com/oauthplayground
  */
 @Api(name = "voucheradmin",
@@ -40,24 +42,26 @@ public class BatchesEndpoint {
     @ApiMethod(name = "communities.campaigns.batches.getOne",
             path = "communities/{communityId}/campaigns/{campaignId}/batches/{batchId}",
             httpMethod = GET)
-    public Batch getBatch(@Named("communityId") long communityId,
-                          @Named("campaignId") long campaignId,
-                          @Named("batchId") long batchId,
-                          User user) throws EntityNotFoundException, OAuthRequestException {
+    public Batch getOne(@Named("communityId") long communityId,
+                        @Named("campaignId") long campaignId,
+                        @Named("batchId") long batchId,
+                        User user) throws EntityNotFoundException, OAuthRequestException {
+        logger.info("getOne communityId:" + communityId + ", campaignId:" + campaignId + ", batchId:" + batchId);
         authorizationService.authorize(user);
-        logger.info("getOne with id " + batchId);
         return batchService.findOne(communityId, campaignId, batchId);
     }
 
     @ApiMethod(name = "communities.campaigns.batches.getAll",
             path = "communities/{communityId}/campaigns/{campaignId}/batches",
             httpMethod = GET)
-    public List<Batch> getBatches(@Named("communityId") long communityId,
-                                  @Named("campaignId") long campaignId,
-                                  User user) throws EntityNotFoundException, OAuthRequestException {
+    public List<Batch> getAll(@Named("communityId") long communityId,
+                              @Named("campaignId") long campaignId,
+                              @Nullable @DefaultValue("0") @Named("page") int page,
+                              @Nullable @DefaultValue("1000000") @Named("size") int size,
+                              User user) throws EntityNotFoundException, OAuthRequestException {
+        logger.info("getAll communityId:" + communityId + ", campaignId:" + campaignId + ", page:" + page + ", size:" + size);
         authorizationService.authorize(user);
-        logger.info("getAll");
-        return batchService.findAll(communityId, campaignId);
+        return batchService.findAll(communityId, campaignId, page, size);
     }
 
     @ApiMethod(name = "communities.campaigns.batches.create",
@@ -67,8 +71,8 @@ public class BatchesEndpoint {
                        @Named("campaignId") long campaignId,
                        Batch batch,
                        User user) throws ParseException, OAuthRequestException {
+        logger.info("create communityId:" + communityId + ", campaignId:" + campaignId + ", batch:" + batch);
         authorizationService.authorize(user);
-        logger.info("create: batch=" + batch);
         batchService.createBatch(batch, communityId, campaignId);
     }
 
@@ -76,11 +80,11 @@ public class BatchesEndpoint {
             path = "communities/{communityId}/campaigns/{campaignId}/batches/{batchId}/activate",
             httpMethod = PUT)
     public Batch activate(@Named("communityId") long communityId,
-                       @Named("campaignId") long campaignId,
-                       @Named("batchId") long batchId,
-                       User user) throws ParseException, OAuthRequestException {
+                          @Named("campaignId") long campaignId,
+                          @Named("batchId") long batchId,
+                          User user) throws ParseException, OAuthRequestException {
+        logger.info("activate communityId:" + communityId + ", campaignId:" + campaignId + ", batchId:" + batchId);
         authorizationService.authorize(user);
-        logger.info("activateBatch: batchId=" + batchId);
         return batchService.changeStatus(batchId, communityId, campaignId, true);
     }
 
@@ -88,11 +92,11 @@ public class BatchesEndpoint {
             path = "communities/{communityId}/campaigns/{campaignId}/batches/{batchId}/deactivate",
             httpMethod = PUT)
     public Batch deactivate(@Named("communityId") long communityId,
-                         @Named("campaignId") long campaignId,
-                         @Named("batchId") long batchId,
-                         User user) throws ParseException, OAuthRequestException {
+                            @Named("campaignId") long campaignId,
+                            @Named("batchId") long batchId,
+                            User user) throws ParseException, OAuthRequestException {
+        logger.info("deactivate communityId:" + communityId + ", campaignId:" + campaignId + ", batchId:" + batchId);
         authorizationService.authorize(user);
-        logger.info("deactivateBatch: batchId=" + batchId);
         return batchService.changeStatus(batchId, communityId, campaignId, false);
     }
 
