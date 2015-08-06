@@ -51,15 +51,37 @@ public class VoucherService {
     public long redeem(long communityId, String voucherCode, long id, String email) {
         Key<Community> communityKey = Key.create(Community.class, communityId);
         List<Voucher> vouchers = ofy().load().type(Voucher.class).ancestor(communityKey).filter("code", voucherCode).list();
-        if(vouchers.size()!=1) {
-            logger.info("vouchers : " + vouchers);
-            throw new RuntimeException("Actual size for " + communityId + " code " + voucherCode + " is " + vouchers.size());
+        if (vouchers.size() != 1) {
+            raise("redeem voucher by code " + voucherCode + " returns list:" + vouchers);
         }
+
         Voucher voucher = vouchers.get(0);
+        validate(voucher);
         voucher.redeem(id, email);
         ofy().save().entity(voucher).now();
-        Campaign campaign = voucher.batchRef.get().getCampaignRef().get();
 
+        Campaign campaign = voucher.batchRef.get().getCampaignRef().get();
         return campaign.productId;
+    }
+
+    private void validate(Voucher voucher) {
+        if (voucher.redeemedDate != null) {
+            raise("voucher " + voucher + " has been already redeemed");
+        }
+
+        Batch batch = voucher.batchRef.get();
+        if (!batch.getIsActive()) {
+            raise("voucher " + voucher + " refers to inactive batch " + batch);
+        }
+
+        Campaign campaign = batch.getCampaignRef().get();
+        if (!campaign.isActive) {
+            raise("voucher " + voucher + " refers to inactive campaign " + campaign);
+        }
+    }
+
+    private void raise(String msg) {
+        logger.info(msg);
+        throw new RuntimeException(msg);
     }
 }

@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -20,56 +21,48 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class TestRedeem {
     public static void main(String[] args) throws IOException, InterruptedException {
-        List<String> strings = Files.readAllLines(Paths.get("D:\\codes.txt"), Charset.defaultCharset());
+        String voucherCodesPath = "D:\\codes.txt";
+        int threadCount = 10;
+        String serverAddress = "http://localhost:8080";
+        //String serverAddress = "https://voucher-admin.appspot.com";
+
+        List<String> strings = Files.readAllLines(Paths.get(voucherCodesPath), Charset.defaultCharset());
 
         final ConcurrentLinkedQueue<String> queue = new ConcurrentLinkedQueue<>(strings);
 
-        Thread t1 = new Thread(new Worker(queue));
-        Thread t2 = new Thread(new Worker(queue));
-        Thread t3 = new Thread(new Worker(queue));
-        Thread t4 = new Thread(new Worker(queue));
-        Thread t5 = new Thread(new Worker(queue));
-        Thread t6 = new Thread(new Worker(queue));
-        Thread t7 = new Thread(new Worker(queue));
-        Thread t8 = new Thread(new Worker(queue));
-        Thread t9 = new Thread(new Worker(queue));
-        Thread t10 = new Thread(new Worker(queue));
+        List<Thread> threads = new ArrayList<>(threadCount);
+        for (int i = 0; i < threadCount; i++) {
+            threads.add(new Thread(new Worker(queue, serverAddress)));
+        }
 
-        t1.start();
-        t2.start();
-        t3.start();
-        t4.start();
-        t5.start();
-        t6.start();
-        t7.start();
-        t8.start();
-        t9.start();
-        t10.start();
+        for (int i = 0; i < threadCount; i++) {
+            threads.get(i).start();
+        }
 
-        t1.join();
-        t10.join();
+        for (int i = 0; i < threadCount; i++) {
+            threads.get(i).join();
+        }
+
     }
 
     private static class Worker implements Runnable {
-
         private ConcurrentLinkedQueue<String> queue;
+        private String serverAddress;
 
-        public Worker(ConcurrentLinkedQueue<String> queue) {
+        public Worker(ConcurrentLinkedQueue<String> queue, String serverAddress) {
             this.queue = queue;
+            this.serverAddress = serverAddress;
         }
 
         @Override
         public void run() {
             String s;
-            while((s = queue.poll())!=null) {
+            while ((s = queue.poll()) != null) {
                 try {
-                    String url = "http://localhost:8080/_ah/api/voucheradmin/v2/communities/1/vouchers/" + s + "/redeem";
-                    //String url = "https://voucher-admin.appspot.com/_ah/api/voucheradmin/v2/communities/1/vouchers/" + s + "/redeem";
-
                     HttpClient client = HttpClientBuilder.create().build();
-                    HttpPut put = new HttpPut(url);
+                    HttpPut put = new HttpPut(serverAddress + "/_ah/api/voucheradmin/v2/communities/1/vouchers/" + s + "/redeem");
                     put.addHeader("Content-Type", "application/json");
-                    put.setEntity(new StringEntity("{\"id\":33333,\"userName\":\""+ Thread.currentThread().getName() + "\"}"));
+                    put.setEntity(new StringEntity("{\"id\":33333,\"userName\":\"" + Thread.currentThread().getName() + "\"}"));
 
                     org.apache.http.HttpResponse response = client.execute(put);
 
