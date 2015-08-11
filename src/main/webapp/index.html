@@ -118,7 +118,7 @@
         $('#batchHolder').html(
             '<div>' + data.id + '</div>' +
             '<div>' + data.name + '</div>' +
-            '<div>' + data.generateCodesCount + '</div>' +
+            '<div>' + data.generatedCodes + '</div>' +
             '<div>' + data.createDate + '</div>' +
             '<div>' + data.startDate + '</div>' +
             '<div>' + data.endDate + '</div>' +
@@ -139,7 +139,7 @@
                     '<div class="row">' +
                         '<a data="' + items[i].id + '" href="#">' + items[i].id + '</a>' +
                         '<div style="width:120px">' + items[i].name + '</div>' +
-                        '<div style="width:120px">' + items[i].generateCodesCount + '</div>' +
+                        '<div style="width:120px">' + items[i].generatedCodes + '</div>' +
                         '<div>' + items[i].createDate + '</div>' +
                         '<div>' + items[i].startDate + '</div>' +
                         '<div>' + items[i].endDate + '</div>' +
@@ -183,7 +183,7 @@
     <input name="name" type="text">
     <br>
     <span>Code count:</span>
-    <input name="generateCodesCount" type="text" value="1">
+    <input name="generatedCodes" type="text" value="1">
     <br>
     <span>Start date</span>
     <input name="startDate" type="text" value="2015-07-25T00:00:00.000Z">
